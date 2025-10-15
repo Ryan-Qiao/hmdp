@@ -11,6 +11,7 @@ import com.hmdp.entity.User;
 import com.hmdp.mapper.UserMapper;
 import com.hmdp.service.IUserService;
 import com.hmdp.utils.RegexUtils;
+import com.hmdp.utils.UserHolder;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -93,6 +94,13 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
 
 
         return Result.ok(token);
+    }
+
+    @Override
+    public Result logout(String token) {
+        String tokenKey = LOGIN_USER_KEY+token;
+        stringRedisTemplate.delete(tokenKey);
+        return Result.ok();
     }
 
     private User createUserWithPhone(String phone){
