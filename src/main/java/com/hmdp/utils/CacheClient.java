@@ -43,6 +43,7 @@ public class CacheClient {
     public <R, ID> R queryWithPassThrough(String keyPrefix, ID id, Class<R> type, Function<ID, R> dbFallback, Long time, TimeUnit unit) {
         String key = keyPrefix + id;
         String json = stringRedisTemplate.opsForValue().get(key);
+        //isNotBlank
         if (StrUtil.isNotBlank(json)) {
             return JSONUtil.toBean(json, type);
         }

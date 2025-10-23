@@ -22,6 +22,7 @@ import java.time.LocalDateTime;
 @Data
 @EqualsAndHashCode(callSuper = false)
 @Accessors(chain = true)
+//Mybatis-Plus注解，指定表名
 @TableName("tb_shop")
 public class Shop implements Serializable {
 

@@ -25,7 +25,7 @@ public class RefreshTokenInterceptor implements HandlerInterceptor {
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
-        log.info("RefreshTokenInterceptor preHandle拦截成功......");
+//        log.info("RefreshTokenInterceptor preHandle拦截成功......");
         String token = request.getHeader("authorization");
         if(StrUtil.isBlank(token)){
             return true;
@@ -45,7 +45,7 @@ public class RefreshTokenInterceptor implements HandlerInterceptor {
 
     @Override
     public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
-        log.info("RefreshTokenInterceptor afterCompletion拦截成功............");
+//        log.info("RefreshTokenInterceptor afterCompletion拦截成功............");
         UserHolder.removeUser();
     }
 }

@@ -22,7 +22,7 @@ import static com.hmdp.utils.RedisConstants.LOGIN_USER_TTL;
 public class LoginInterceptor implements HandlerInterceptor {
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
-        log.info("LoginInterceptor preHandle拦截成功......");
+//        log.info("LoginInterceptor preHandle拦截成功......");
         if(UserHolder.getUser()==null){
             response.setStatus(401);
             return false;
