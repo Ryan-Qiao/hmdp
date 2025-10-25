@@ -8,8 +8,11 @@ import com.hmdp.service.ISeckillVoucherService;
 import com.hmdp.service.IVoucherOrderService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.hmdp.utils.RedisIdWorker;
+import com.hmdp.utils.SimpleRedisLock;
 import com.hmdp.utils.UserHolder;
 import org.springframework.aop.framework.AopContext;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,6 +35,8 @@ public class VoucherOrderServiceImpl extends ServiceImpl<VoucherOrderMapper, Vou
 
     @Resource
     RedisIdWorker redisIdWorker;
+    @Autowired
+    private StringRedisTemplate stringRedisTemplate;
 
     @Override
     public Result seckillVoucher(Long voucherId) {
@@ -69,25 +74,34 @@ public class VoucherOrderServiceImpl extends ServiceImpl<VoucherOrderMapper, Vou
          * 	1.	intern() 使用字符串常量池，可能造成内存压力（用户数很大时）。
          * 	2.	适用于单机部署，在分布式环境中，锁只在当前 JVM 内有效。
          */
-        synchronized (userId.toString().intern()) {
-            /**
-             * Spring 的 @Transactional 是靠 动态代理 实现的。
-             * 当外部调用一个 @Transactional 方法时：
-             * 	1.	Spring 通过代理对象拦截调用；
-             * 	2.	代理在调用前开启事务；
-             * 	3.	调用结束后提交或回滚事务。
-             *
-             * 	内部调用这个函数不会走代理，Transactional就失效了，只有外部调用走代理，Transactional才会有效
-             * 	Spring 默认使用 JDK 动态代理（实现了接口），所以这里转为IVoucherOrderService
-             */
-            IVoucherOrderService proxy = (IVoucherOrderService) AopContext.currentProxy();//获取当前代理对象
-            /**
-             * AopContext.currentProxy() 返回的是 当前 Bean 的代理对象，而 Spring 默认使用 JDK 动态代理（基于接口），所以返回类型是 IVoucherOrderService 接口
-             */
-            return proxy.createVoucherOrder(voucherId);
+//        synchronized (userId.toString().intern()) {
+//            /**
+//             * Spring 的 @Transactional 是靠 动态代理 实现的。
+//             * 当外部调用一个 @Transactional 方法时：
+//             * 	1.	Spring 通过代理对象拦截调用；
+//             * 	2.	代理在调用前开启事务；
+//             * 	3.	调用结束后提交或回滚事务。
+//             *
+//             * 	内部调用这个函数不会走代理，Transactional就失效了，只有外部调用走代理，Transactional才会有效
+//             * 	Spring 默认使用 JDK 动态代理（实现了接口），所以这里转为IVoucherOrderService
+//             */
+//            IVoucherOrderService proxy = (IVoucherOrderService) AopContext.currentProxy();//获取当前代理对象
+//            /**
+//             * AopContext.currentProxy() 返回的是 当前 Bean 的代理对象，而 Spring 默认使用 JDK 动态代理（基于接口），所以返回类型是 IVoucherOrderService 接口
+//             */
+//            return proxy.createVoucherOrder(voucherId);
+//        }
+        SimpleRedisLock simpleRedisLock = new SimpleRedisLock(stringRedisTemplate,"order"+userId);
+        boolean isLock = simpleRedisLock.tryLock(1200);
+        if(!isLock){
+            return Result.fail("一人仅可下一单！");
         }
-
-
+        try {
+            IVoucherOrderService proxy = (IVoucherOrderService) AopContext.currentProxy();
+            return proxy.createVoucherOrder(voucherId);
+        } finally {
+            simpleRedisLock.unLock();
+        }
     }
 
     //Transactional要想有效果，需要Spring利用他的代理对象进行执行，而直接在类中调用这个函数不会触发Transactional
