@@ -61,18 +61,6 @@ public class ShopServiceImpl extends ServiceImpl<ShopMapper, Shop> implements IS
 
     }
 
-//    public void saveShop2Redis(Long id, Long expireSeconds) throws InterruptedException {
-//        Shop shop = getById(id);
-////        Thread.sleep(10);
-//        RedisData redisData = new RedisData();
-//        redisData.setData(shop);
-//        redisData.setExpireTime(LocalDateTime.now().plusSeconds(expireSeconds));
-//        stringRedisTemplate.opsForValue().set(CACHE_SHOP_KEY + id, JSONUtil.toJsonStr(redisData));
-//        //toJsonStr将Java对象序列化为Json字符串
-//    }
-
-
-
     @Override
     @Transactional
     public Result update(Shop shop) {

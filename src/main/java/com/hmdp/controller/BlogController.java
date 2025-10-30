@@ -1,6 +1,7 @@
 package com.hmdp.controller;
 
 
+import com.baomidou.mybatisplus.extension.conditions.query.QueryChainWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.hmdp.dto.Result;
 import com.hmdp.dto.UserDTO;
@@ -10,6 +11,7 @@ import com.hmdp.service.IBlogService;
 import com.hmdp.service.IUserService;
 import com.hmdp.utils.SystemConstants;
 import com.hmdp.utils.UserHolder;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
@@ -25,6 +27,7 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/blog")
+@Slf4j
 public class BlogController {
 
     @Resource
@@ -46,9 +49,10 @@ public class BlogController {
     @PutMapping("/like/{id}")
     public Result likeBlog(@PathVariable("id") Long id) {
         // 修改点赞数量
-        blogService.update()
-                .setSql("liked = liked + 1").eq("id", id).update();
-        return Result.ok();
+//        blogService.update()
+//                .setSql("liked = liked + 1").eq("id", id).update();
+        Result res = blogService.likeBlog(id);
+        return Result.ok(res);
     }
 
     @GetMapping("/of/me")
@@ -77,7 +81,26 @@ public class BlogController {
             User user = userService.getById(userId);
             blog.setName(user.getNickName());
             blog.setIcon(user.getIcon());
+            blog.setIsLike(blogService.isBlogLiked(blog));
         });
         return Result.ok(records);
     }
+    @GetMapping("/{id}")
+    public Result getBlog(@PathVariable Long id){
+        log.info("获取blog id"+id);
+        Blog blog = blogService.query().eq("id", id).one();
+        Long userId = blog.getUserId();
+        User user = userService.getById(userId);
+        blog.setIcon(user.getIcon());
+        blog.setName(user.getNickName());
+        blog.setIsLike(blogService.isBlogLiked(blog));
+        return Result.ok(blog);
+    }
+
+    @GetMapping("/likes/{id}")
+    public Result getLikes(@PathVariable("id") Long id){
+        Blog blog = blogService.getById(id);
+        return Result.ok(blog.getLiked());
+    }
+
 }
