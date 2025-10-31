@@ -60,7 +60,7 @@ public class ShopServiceImpl extends ServiceImpl<ShopMapper, Shop> implements IS
         return Result.ok(shop);
 
     }
-
+//11
     @Override
     @Transactional
     public Result update(Shop shop) {
