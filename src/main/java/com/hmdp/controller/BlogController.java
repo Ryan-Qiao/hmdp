@@ -99,8 +99,9 @@ public class BlogController {
 
     @GetMapping("/likes/{id}")
     public Result getLikes(@PathVariable("id") Long id){
-        Blog blog = blogService.getById(id);
-        return Result.ok(blog.getLiked());
+//        Blog blog = blogService.getById(id);
+        return blogService.getLikes(id);
+
     }
 
 }

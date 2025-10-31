@@ -17,4 +17,5 @@ public interface IBlogService extends IService<Blog> {
 
     boolean isBlogLiked(Blog blog);
 
+    Result getLikes(Long id);
 }
