@@ -1,6 +1,7 @@
 package com.hmdp.service;
 
 import com.hmdp.dto.Result;
+import com.hmdp.dto.ScrollResult;
 import com.hmdp.entity.Blog;
 import com.baomidou.mybatisplus.extension.service.IService;
 
@@ -18,4 +19,8 @@ public interface IBlogService extends IService<Blog> {
     boolean isBlogLiked(Blog blog);
 
     Result getLikes(Long id);
+
+    Result saveBlog(Blog blog);
+
+    Result queryBlogOfFollow(Long max, Integer offset);
 }
